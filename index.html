@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChipWise - Learn Hardware Piece by Piece</title>
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  color:white;
+  background: black url('pic.jpg') no-repeat center top;
+  background-size: contain;
+  background-attachment: fixed;
+  position: relative;
+}
+body::before{
+  content:"";
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.6);
+  z-index:-1;
+}
+.overlay{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px;
+  text-align:center;
+}
+h1{color:#3a86ff; margin-bottom:10px;}
+p{margin:8px 0;}
+button{
+  padding:12px 24px;
+  margin:8px;
+  font-size:16px;
+  background:#3a86ff;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.lesson-btn{
+  width:95%;
+  max-width:480px;
+  background:#111;
+  border:2px solid #8338ec;
+  text-align:left;
+  padding:10px;
+  margin-bottom:8px;
+}
+.lesson-btn small{color:#bbb;}
+#lessonDesc, #lessonDef, #afterText{
+  text-align:left;
+  max-width:480px;
+  width:90%;
+  font-size:16px;
+  margin-bottom:10px;
+}
+#lessonDef{margin-top:5px;}
+#afterText{margin-top:10px; font-style:italic; color:#ccc;}
+img{
+  width:100%;
+  max-width:420px;
+  margin:8px 0;
+  border-radius:10px;
+}
+iframe{
+  width:100%;
+  max-width:420px;
+  height:240px;
+  margin:8px 0;
+  border-radius:10px;
+}
+#searchBar{
+  padding:8px;
+  width:90%;
+  max-width:400px;
+  margin:12px 0;
+  border-radius:6px;
+  border:none;
+  font-size:16px;
+}
+.quiz-box{
+  background:#111;
+  border:2px solid #3a86ff;
+  padding:20px;
+  border-radius:10px;
+  max-width:480px;
+}
+.quiz-box button{
+  width:100%;
+  margin:6px 0;
+}
+.hidden{display:none;}
+.italic-small{font-size:14px; font-style:italic; display:block; margin-top:3px;}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="overlay">
+  <img src="pic.jpg" alt="ChipWise Logo" style="max-width:320px; margin-bottom:10px;">
+  <button onclick="startApp()">Ready to Learn</button>
+</div>
+
+<!-- LESSON LIST -->
+<div id="list" class="overlay hidden">
+  <h1>Select a Lesson</h1>
+  <!-- Google Search Bar -->
+  <input type="text" id="searchBar" placeholder="Search anything online..." onkeydown="searchOnline(event)">
+  <p style="font-size:14px; color:#ccc;">Press Enter to search. Google opens in a new tab. You can return here anytime.</p>
+  <div id="lessonButtons"></div>
+  <button onclick="openQuiz()">Exit & Take Quiz</button>
+</div>
+
+<!-- LESSON -->
+<div id="lesson" class="overlay hidden">
+  <h1 id="lessonTitle"></h1>
+  <p id="lessonDesc"></p>
+  <p id="lessonDef"></p>
+  <img id="img1">
+  <img id="img2">
+  <img id="img3">
+  <p id="afterText"></p>
+  <iframe id="video" src="" frameborder="0" allowfullscreen></iframe>
+  <button onclick="backToList()">Back to Lessons</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="overlay hidden">
+  <h1>Final Quiz</h1>
+  <div id="quizBox" class="quiz-box"></div>
+</div>
+
+<script>
+// Elements
+const home=document.getElementById("home");
+const list=document.getElementById("list");
+const lesson=document.getElementById("lesson");
+const quiz=document.getElementById("quiz");
+const lessonButtons=document.getElementById("lessonButtons");
+const lessonTitle=document.getElementById("lessonTitle");
+const lessonDesc=document.getElementById("lessonDesc");
+const lessonDef=document.getElementById("lessonDef");
+const afterText=document.getElementById("afterText");
+const img1=document.getElementById("img1");
+const img2=document.getElementById("img2");
+const img3=document.getElementById("img3");
+const video=document.getElementById("video");
+const quizBox=document.getElementById("quizBox");
+const searchInput=document.getElementById("searchBar");
+
+// Lessons
+const lessons=[
+{
+ title:"Starting / Shutting Down a PC",
+ desc:"To start a computer, press the power button and wait for the system to load properly before using it.<span class='italic-small'>Upang buksan ang computer, pindutin ang power button at hintaying mag-load nang maayos ang system bago ito gamitin.</span>",
+ def:"A computer must be turned on and off safely to prevent damage.<span class='italic-small'>Ang computer ay dapat buksan at isara nang maayos upang maiwasan ang sira.</span>",
+ imgs:[
+  "Lesson1-start.jpg",
+  "Lesson 1-shutting1.jpg",
+  "Lesson 1-shutting2.jpg"
+ ],
+ after:"If you want to learn more about other basic buttons or ports, watch the video below.",
+ vid:"https://www.youtube.com/embed/Tx0ntUobTu8"
+},
+{
+ title:"Basic Buttons of System Unit",
+ desc:"Identify buttons and ports of a system unit.<span class='italic-small'>Kilalanin ang mga button at ports ng system unit.</span>",
+ def:"Buttons and ports allow you to connect and operate devices.<span class='italic-small'>Ang buttons at ports ay nagpapagana ng mga devices.</span>",
+ imgs:[
+  "Lesson 2-port.jpg",
+  "Lesson 2-usb.jpg",
+  "Lesson2-buttons.jpg"
+ ],
+ after:"If you want to learn more about other basic buttons or ports, watch the video below.",
+ vid:"https://www.youtube.com/embed/yq9qzw8p7FI"
+},
+{
+ title:"Input Devices",
+ desc:"Devices used to input data.<span class='italic-small'>Mga kagamitang pang-input ng data.</span>",
+ def:"Input devices let you send information to the computer.<span class='italic-small'>Ang input devices ay nagpapadala ng impormasyon sa computer.</span>",
+ imgs:[
+  "Lesson 3-input.png",
+  "Lesson 3-input.jpg",
+  ""
+ ],
+ after:"If you want to learn more about input devices, please watch the video below.",
+ vid:"https://www.youtube.com/embed/JG_pea_aqpQ"
+},
+{
+ title:"Output Devices",
+ desc:"Devices that show output.<span class='italic-small'>Mga kagamitang nagpapakita ng output.</span>",
+ def:"Output devices let you see or hear results from the computer.<span class='italic-small'>Ang output devices ay nagpapakita ng resulta mula sa computer.</span>",
+ imgs:[
+  "Lesson4-output.png",
+  "",
+  ""
+ ],
+ after:"If you want to learn more about output devices, please watch the video below.",
+ vid:"https://www.youtube.com/embed/KV_L3a0Cl3U"
+},
+{
+ title:"System Unit Devices",
+ desc:"Parts inside the system unit.<span class='italic-small'>Mga bahagi sa loob ng system unit.</span>",
+ def:"System unit contains essential components for computing.<span class='italic-small'>Ang system unit ay naglalaman ng mahahalagang bahagi ng computer.</span>",
+ imgs:[
+  "Lesson5-systemunit.jpg",
+  "",
+  ""
+ ],
+ after:"If you want to learn more about system unit devices, please watch the video below.",
+ vid:"https://www.youtube.com/embed/ygJgyhc0BTg"
+}
+];
+
+// Quiz
+const quizData=[
+["Which device is an input device?","Keyboard","Monitor","Speaker",0],
+["Which button turns on the PC?","Reset","Power","USB",1],
+["Which is an output device?","Mouse","Printer","Scanner",1],
+["What is inside the system unit?","Monitor","Motherboard","Keyboard",1],
+["Which device displays images?","Monitor","Mouse","Microphone",0]
+];
+let answers=[];
+
+// Functions
+function startApp(){
+ home.classList.add("hidden");
+ list.classList.remove("hidden");
+ renderLessons();
+}
+
+// Render lesson buttons
+function renderLessons(){
+ lessonButtons.innerHTML="";
+ lessons.forEach((l,i)=>{
+  let b=document.createElement("button");
+  b.className="lesson-btn";
+  b.innerHTML=`<b>${l.title}</b><br><small>Lesson ${i+1} (Basic → Hard)</small>`;
+  b.onclick=()=>openLesson(i);
+  lessonButtons.appendChild(b);
+ });
+}
+
+// Open lesson
+function openLesson(i){
+ list.classList.add("hidden");
+ lesson.classList.remove("hidden");
+ lessonTitle.innerText=lessons[i].title;
+ lessonDesc.innerHTML=lessons[i].desc;
+ lessonDef.innerHTML=lessons[i].def;
+ img1.src=lessons[i].imgs[0] || "";
+ img2.src=lessons[i].imgs[1] || "";
+ img3.src=lessons[i].imgs[2] || "";
+afterText.innerText=lessons[i].after;
+ video.src=lessons[i].vid;
+}
+
+// Back to lesson list
+function backToList(){
+ lesson.classList.add("hidden");
+ list.classList.remove("hidden");
+ video.src="";
+}
+
+// Quiz
+function openQuiz(){
+ list.classList.add("hidden");
+ quiz.classList.remove("hidden");
+ quizBox.innerHTML="";
+ answers=[];
+ quizData.forEach((q,i)=>{
+  quizBox.innerHTML+=`<p><b>${i+1}. ${q[0]}</b></p>`;
+  for(let x=1;x<=3;x++){
+   quizBox.innerHTML+=`<button onclick="answers[${i}]=${x-1}">${q[x]}</button>`;
+  }
+ });
+ quizBox.innerHTML+=`<button onclick="submitQuiz()">Submit Quiz</button>`;
+}
+
+function submitQuiz(){
+ if(answers.length<5 || answers.includes(undefined)){
+  alert("Please answer all questions!");
+  return;
+ }
+ let score=0;
+ quizData.forEach((q,i)=>{if(answers[i]==q[4])score++;});
+ alert("You got "+score+"/5");
+ location.reload();
+}
+
+// External search bar (Google)
+function searchOnline(e){
+  if(e.key === "Enter"){
+    let query = searchInput.value;
+    if(query){
+      window.open("https://www.google.com/search?q="+encodeURIComponent(query), "_blank");
+    }
+  }
+}
+</script>
+</body>
+</html>
